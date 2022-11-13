@@ -24,4 +24,6 @@ const ruta = 'C:\\Users\\Usuario\\Downloads\\sadys\\sadys\\md-link\\BOG005-md-li
 // });
 
 // }
-// mdLinks(ruta)
+// mdLinks(ruta).then(res( =>{
+    //  console.log(res)
+// }))

@@ -9,7 +9,9 @@ const path = require("path");
  * @param {*} options 
 */ 
 const ruta = 'C:\\\\Users\\Usuario\\Downloads\\sadys\\sadys\\md-link\\BOG005-md-links\\prueba\\pue.md';
-const rot = 'C:\\Users\\Usuario\\Downloads\\sadys\\sadys\\md-link\\BOG005-md-links\\prueba\\prueb2\\ejemplo.md'
+const rot = 'C:\\Users\\Usuario\\Downloads\\sadys\\sadys\\md-link\\BOG005-md-links\\prueba\\prueb2\\ejemplo.md';
+const rotDOs ='C:\\Users\\Usuario\\Downloads\\sadys\\sadys\\md-link\\BOG005-md-links\\prueba\\prueb2'
+const archivo= './prueba/prueba2'
 
 //verificando si la ruta existe
   const rutaExiste = (path)=>{
@@ -50,7 +52,6 @@ const identify = (route) => {
         console.log('es un archivo')
         if (fileMD(route) === ruta) {
           files.push(route)
-          console.log(files)
         }
       }
       else if (stats.isDirectory()) {
@@ -71,7 +72,7 @@ const  readFiles = (ruta)=>{
     .then(resp=>{
       // resolve(resp)
       console.log(resp + '==========================================leyendo archivo')
-
+      getOneLink(resp,ruta)
     })
     .catch(()=> reject('Error al leer el archivo')) 
   })
@@ -80,13 +81,36 @@ const  readFiles = (ruta)=>{
 };
 console.log(readFiles(ruta));
 
-
-
+//Funcion de extrear links
+function getOneLink(file, ruta) {
+  let foundFile = file.match(/\[.*\]\(https:\/\/[\w\-\.]+\/.*\)/g); 
+  console.log(file,87)
+  let arrayLinks = [];
+  if (foundFile) {//si hay links
+      foundFile.forEach((link) => {
+        console.log(link, 90)
+          arrayLinks.push({
+              href: link.match(/https:\/\/.*[^)]/g).toString(),
+              text: link.match(/\[(.*)\]/)[1],
+              file: ruta,
+          })
+      })
+  }
+  else {
+      arrayLinks.push({
+          href: 'No hay URL',
+          text: 'No hay texto de URL',
+          file: ruta,
+      })
+    }
+    console.log(arrayLinks, 9000)
+  return arrayLinks
+}
 
 
 // // funcion recursiva
 // const recursion = (route) => {
-//   let newArr = [];
+//   let newAra = [];
 
 // };
 
