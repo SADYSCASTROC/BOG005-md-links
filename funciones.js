@@ -1,45 +1,27 @@
 const fs = require('fs');
 const path = require("path");
+const axios = require('axios');
+const { log } = require('console');
 
-// const readFileSync = require ('node:fs');
-//TODO: repasar sobre JSDOC
+
 /**
  * Retornar una promesa que resuelve un array de objetos
  * @param {*} path 
  * @param {*} options 
-*/ 
-const ruta = 'C:\\\\Users\\Usuario\\Downloads\\sadys\\sadys\\md-link\\BOG005-md-links\\prueba\\pue.md';
-const rot = 'C:\\Users\\Usuario\\Downloads\\sadys\\sadys\\md-link\\BOG005-md-links\\prueba\\prueb2\\ejemplo.md';
-const rotDOs ='C:\\Users\\Usuario\\Downloads\\sadys\\sadys\\md-link\\BOG005-md-links\\prueba\\prueb2'
-const archivo= './prueba/prueba2'
+*/
 
-//verificando si la ruta existe
-  const rutaExiste = (path)=>{
-       if(fs.readFileSync(path)){
-          return `si existe`;
-        } else {
-          return false;
-        }
-  };
-  console.log(rutaExiste(ruta))
-
-  // Verifica si la ruta es absoluta, y si no la convierte
+// Verifica si la ruta es absoluta, y si no la convierte ==========================================================//
 const pathAbsolute = (route) => path.isAbsolute(route) ? route : path.resolve(route);
-console.log(pathAbsolute(ruta ),' ====================== absoluta');
 
 
 // validando la extencion md
-
 const fileMD = (route) => {
-  if(path.extname(route) === '.md' ){
-    // console.log('si es md ');
+  if (path.extname(route) === '.md') {
     return route;
-  }else{
-    // console.log('no es md')
+  } else {
     return 'no es md';
   }
-  };
-console.log(fileMD(ruta),'======================verificando extencion md')
+};
 
 // es un archivo o un directorio
 const identify = (route) => {
@@ -47,78 +29,94 @@ const identify = (route) => {
   return new Promise((resolve, reject) => {
     fs.stat(route, (err, stats) => {
       if (err) {
-        console.log('La ruta no existe',48);
       } else if (stats.isFile()) {
-        console.log('es un archivo')
         if (fileMD(route) === ruta) {
           files.push(route)
         }
       }
       else if (stats.isDirectory()) {
-        console.log('es directorio')
         files.push(route)
-        
+
       }
     });
   })
 };
-console.log(identify(rot))
 
 //Leer un archivo
-const  readFiles = (ruta)=>{
-  
-  let sedebeRetornar = new Promise((resolve, reject) => {
-    fs.promises.readFile(ruta, 'utf-8')
-    .then(resp=>{
-      // resolve(resp)
-      console.log(resp + '==========================================leyendo archivo')
-      getOneLink(resp,ruta)
+const readFiles = (ruta) => {
+  return new Promise((resolve, reject) => {
+    fs.readFile(ruta, 'utf-8', (err, data) => {
+      if (!err) resolve(getLinks(data, ruta))
     })
-    .catch(()=> reject('Error al leer el archivo')) 
   })
 
-    return sedebeRetornar;
 };
-console.log(readFiles(ruta));
 
-//Funcion de extrear links
-function getOneLink(file, ruta) {
-  let foundFile = file.match(/\[.*\]\(https:\/\/[\w\-\.]+\/.*\)/g); 
-  console.log(file,87)
+//Funcion de extrear links  ==========================================================//
+function getLinks(file, ruta) {
+  let foundFile = file.match(/(?<!!)\[(.*?)\]\((.*?)\)/g);
   let arrayLinks = [];
   if (foundFile) {//si hay links
-      foundFile.forEach((link) => {
-        console.log(link, 90)
-          arrayLinks.push({
-              href: link.match(/https:\/\/.*[^)]/g).toString(),
-              text: link.match(/\[(.*)\]/)[1],
-              file: ruta,
-          })
+    foundFile.forEach((link) => {
+      arrayLinks.push({
+        href: link.match(/(?<!!)\((.*?)\)/g).toString().split('(')[1].split(')')[0],
+        text: link.match(/(?<!!)\[(.*?)\]/g).toString().split('[')[1].split(']')[0],
+        file: ruta,
       })
+    })
   }
   else {
-      arrayLinks.push({
-          href: 'No hay URL',
-          text: 'No hay texto de URL',
-          file: ruta,
-      })
-    }
-    console.log(arrayLinks, 9000)
+    arrayLinks.push({
+      href: 'No hay URL',
+      text: 'No hay texto de URL',
+      file: ruta,
+    })
+  }
   return arrayLinks
 }
 
+//funcion stats ==========================================================//
+const stats = (arrayPrueba) => {
+  const objStats = {
+    'Total': arrayPrueba.length,
+    'Unique': new Set(arrayPrueba.map((element) => element.href)).size
+  }
+  return objStats
+}
 
-// // funcion recursiva
-// const recursion = (route) => {
-//   let newAra = [];
 
-// };
+const statsBrokens = (arrayPrueba) => {
+  const broken = arrayPrueba.filter((links) => links.OK === 'fail').length;
+  const total = {
+    'Total': arrayPrueba.length,
+    'Unique': new Set(arrayPrueba.map((element) => element.href)).size,
+    'Broken': broken
+  }
+  return total
+}
 
-// // console.log(recursion(path))
 
+//funcion validar http ==========================================================//
+const validateHttp = (links) => {
+  const validacion = links.map((link) => {
+    return axios.get(link.href)
+      .then((response) => {
+          link.status = response.status,
+          link.result = 'OK'
+          return link;
+      })
+      .catch((error) => {
+        link.status = 404,
+        link.result = 'FAIL'
 
+        return link
+      })
+  })
 
-module.exports =  readFiles, fileMD
+  return Promise.all(validacion).then(res => res)
+};
+
+module.exports = { pathAbsolute, fileMD, identify, readFiles, getLinks, stats, statsBrokens, validateHttp }
 
 
 

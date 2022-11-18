@@ -1,29 +1,43 @@
-
-const  readFiles = require('./funciones');
-const  fileMD = require('./funciones');
-
-
-//TODO: repasar sobre JSDOC
+const {pathAbsolute }= require('./funciones');
+const {readFiles} = require('./funciones');
+const stats = require('./funciones');
+const statsBrokens = require('./funciones');
+const {validateHttp} = require('./funciones');
+const route = process.argv[2];
 /**
  * Retornar una promesa que resuelve un array de objetos
  * @param {*} path 
  * @param {*} options 
 */
-const ruta = 'C:\\Users\\Usuario\\Downloads\\sadys\\sadys\\md-link\\BOG005-md-links\\prueba\\pue.md';
 
+const mdlinks = (path, options={validate:true}) => {
+    return new Promise((resolve, reject) => {
+      const pathValidated = pathAbsolute(path)
+      if (options.validate === true) {
+        readFiles(pathValidated)
+         .then(res=>{
+            Promise.all(res).then(x =>{
+              resolve(validateHttp(x.flat()))
+          })
+         })
+        
+    }else{
+      readFiles(pathValidated)
+      .then(res => {
+        Promise.all(res).then(x => {
+            resolve(x.flat())
+        })
+    })
+    }
+    })
+  }
 
+  mdlinks(route)
+  .then (res =>{
+    console.log('ver el resultado de md-links; ', res)
+  })
+  .catch(err => {
+    throw err + "errrrrrrrrr";
+  });
 
-// const mdLinks = (path) => {
-
-// return new Promise ((resolve, reject) => {
-//      resolve( readFiles(path)) 
-//        readFiles(path).then(res=> {
-
-//         console.log(res)
-//     })
-// });
-
-// }
-// mdLinks(ruta).then(res( =>{
-    //  console.log(res)
-// }))
+  module.exports = mdlinks;
