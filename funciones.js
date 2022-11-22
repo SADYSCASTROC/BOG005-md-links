@@ -3,13 +3,6 @@ const path = require("path");
 const axios = require('axios');
 const { log } = require('console');
 
-
-/**
- * Retornar una promesa que resuelve un array de objetos
- * @param {*} path 
- * @param {*} options 
-*/
-
 // Verifica si la ruta es absoluta, y si no la convierte ==========================================================//
 const pathAbsolute = (route) => path.isAbsolute(route) ? route : path.resolve(route);
 
@@ -101,13 +94,13 @@ const validateHttp = (links) => {
   const validacion = links.map((link) => {
     return axios.get(link.href)
       .then((response) => {
-          link.status = response.status,
+        link.status = response.status,
           link.result = 'OK'
-          return link;
+        return link;
       })
       .catch((error) => {
         link.status = 404,
-        link.result = 'FAIL'
+          link.result = 'FAIL'
 
         return link
       })

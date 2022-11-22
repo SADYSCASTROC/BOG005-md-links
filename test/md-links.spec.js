@@ -1,10 +1,12 @@
-const mdLinks = require('../');
+const mdlinks = require('../index.js');
+const { mocks } = require('../mocks')
 
 
-describe('mdLinks', () => {
-
-  it('should...', () => {
-    console.log('FIX ME!');
+describe('mdlinks', () => {
+  it('Is a function', () => {
+    expect(typeof mdlinks).toBe('function');
   });
-
+   
 });
+
+
