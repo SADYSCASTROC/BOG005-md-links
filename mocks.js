@@ -1,5 +1,5 @@
-const mocks = {
-    path: 'prueba\prueb2\ejemplo2.md',
+const mocksData = {
+    path: 'C:\Users\Usuario\Downloads\sadys\sadys\md-lin-la\BOG005-md-links\prueba\prueb2\ejemplo2.md',
     validateFalse: [
         {
             href: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/bold',
@@ -44,4 +44,4 @@ const mocks = {
 
 }
 
-module.exports = { mocks }
+module.exports = {mocksData }
